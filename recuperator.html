@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-BANK · РЕКУПЕРАТОР | Встраиваемый банковский Mini-App SDK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0B0C0E;
+  --surf: #121418;
+  --surf-2: #171A20;
+  --bd: #22262F;
+  --bd-strong: #323846;
+  --tx: #F3F4F6;
+  --tx2: #9CA3AF;
+  --tx3: #6B7280;
+  --accent: #FF4F17;
+  --font-display: 'Unbounded', -apple-system, sans-serif;
+  --font-sans: 'Golos Text', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Динамические переменные мобильного банка (по умолчанию Т-Банк) */
+  --app-bg: #0E0F12;
+  --app-surf: #1C1E24;
+  --app-surf-2: #262932;
+  --app-bd: #2C303A;
+  --app-brand: #FFDD2D;
+  --app-brand-tx: #111111;
+  --app-user-msg: #FFDD2D;
+  --app-user-tx: #111111;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--tx);
+  font: 14px/1.5 var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+button { cursor: pointer; }
+.hidden { display: none !important; }
+
+.mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.ico {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* ШАПКА И НАВИГАЦИЯ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--bd);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  color: var(--tx);
+  text-decoration: none;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  color: var(--tx2);
+}
+
+.nav-capsules { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.nav-cap {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tx2);
+  border: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-cap:hover { color: var(--tx); border-color: var(--bd); }
+.nav-cap.active { color: var(--tx); background: var(--surf); border-color: var(--bd-strong); }
+
+.cap-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.top-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* КНОПКИ САЙТА */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--accent);
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tx);
+  font-weight: 500;
+  font-size: 13px;
+  border: 1px solid var(--bd-strong);
+  transition: border-color 0.15s, background 0.15s;
+}
+.btn-secondary:hover { background: var(--surf); border-color: var(--tx2); }
+.btn-sm { padding: 8px 12px; font-size: 12px; }
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 32px 96px;
+}
+
+/* ================= СЕКЦИЯ 1: ГЕРОЙ ================= */
+.hero-stage {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 64px;
+  align-items: center;
+  padding: 24px 0 64px;
+}
+
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--tx);
+  margin-bottom: 32px;
+}
+
+.hero-h1 .accent-line { color: var(--accent); display: block; margin-top: 4px; }
+
+.hero-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 640px;
+  margin-bottom: 40px;
+  color: var(--tx2);
+  font-size: 14px;
+  line-height: 1.6;
+  border-top: 1px solid var(--bd);
+  padding-top: 24px;
+}
+.hero-two-cols b { color: var(--tx); font-weight: 600; }
+
+.hero-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
+
+.partners-strip {
+  max-width: 640px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  color: var(--tx3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  flex-wrap: wrap;
+}
+
+.phone-showcase { display: flex; justify-content: center; align-items: center; }
+
+.device-frame {
+  width: 380px;
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.device-statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--tx3);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--bd);
+}
+
+.card-stack { display: flex; flex-direction: column; gap: 12px; }
+
+.spec-card {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.spec-head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--tx); }
+.spec-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+.spec-number { font-family: var(--font-mono); font-size: 15px; font-weight: 500; letter-spacing: 0.08em; color: var(--tx2); }
+.spec-foot { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 12px; border-top: 1px solid var(--bd); font-size: 12px; color: var(--tx2); }
+.spec-foot b { display: block; color: var(--tx); font-size: 13px; font-weight: 600; margin-top: 2px; }
+.spec-foot b.accent-val { font-family: var(--font-mono); color: var(--accent); font-size: 15px; font-weight: 700; }
+
+/* ================= СЕКЦИЯ 2: ТОЧНАЯ ИМИТАЦИЯ МОБИЛЬНЫХ ПРИЛОЖЕНИЙ БАНКОВ РФ ================= */
+.bank-switcher-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  border-radius: 8px;
+  background: var(--surf);
+  border: 1px solid var(--bd);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.bs-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.bs-chip {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  color: var(--tx2);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.bs-chip:hover { color: var(--tx); border-color: var(--bd-strong); }
+.bs-chip.active { color: var(--tx); border-color: var(--tx); background: var(--surf-2); }
+.b-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* СЦЕНА: СЛЕВА РЕАЛЬНЫЙ ТЕЛЕФОН БАНКА (ЧАТЫ), СПРАВА ПАНЕЛЬ ИНСПЕКТОРА И ОПЕРАЦИЙ */
+.demo-stage-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* РЕАЛИСТИЧНЫЙ КОРПУС ТЕЛЕФОНА С МОБИЛЬНЫМ БАНКОМ */
+.mobile-bank-phone {
+  width: 420px;
+  height: 780px;
+  background: var(--app-bg);
+  border: 1px solid var(--bd-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Верхний статус-бар iOS/Android */
+.mp-statusbar {
+  padding: 10px 20px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx2);
+  background: var(--app-bg);
+  flex-shrink: 0;
+}
+
+/* Нативная шапка мобильного банка (меняется под Т-Банк / Сбер / ВТБ / Альфа) */
+.mp-appbar {
+  padding: 8px 16px 12px;
+  background: var(--app-bg);
+  border-bottom: 1px solid var(--app-bd);
+  flex-shrink: 0;
+}
+
+.mp-appbar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.mp-view-switch {
+  display: inline-flex;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.mp-vbtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx2);
+  border-radius: 4px;
+}
+.mp-vbtn.active {
+  background: var(--app-surf-2);
+  color: var(--tx);
+}
+
+/* Строка поиска в разделе «Чаты» банка */
+.mp-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--tx2);
+}
+
+/* Горизонтальная лента каналов/сторис внутри вкладки Чаты (как в Т-Банке и Сбере) */
+.mp-channels-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--app-bd);
+  overflow-x: auto;
+  background: var(--app-bg);
+  flex-shrink: 0;
+}
+.mp-channel-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 68px;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--tx2);
+  cursor: pointer;
+}
+.mp-ch-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx);
+  position: relative;
+}
+.mp-ch-circle.unread { border-color: var(--app-brand); }
+.mp-ch-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--app-brand);
+}
+
+/* ЭКРАН А ВНУТРИ ТЕЛЕФОНА: СПИСОК ДИАЛОГОВ БАНКА */
+.mp-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mp-dialogs-scroll {
+  flex: 1;
+  overflow-y: auto;
+   divide-y: 1px solid var(--app-bd);
+}
+
+.mp-dlg-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--app-bd);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.mp-dlg-row:hover { background: var(--app-surf); }
+.mp-dlg-row.pinned { background: rgba(255, 255, 255, 0.02); }
+
+.mp-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: var(--app-brand);
+  color: var(--app-brand-tx);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mp-avatar.neutral {
+  background: var(--app-surf-2);
+  color: var(--tx);
+  border: 1px solid var(--app-bd);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.mp-dlg-main { flex: 1; min-width: 0; }
+.mp-dlg-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.mp-dlg-title { font-weight: 600; font-size: 13.5px; color: var(--tx); display: flex; align-items: center; gap: 6px; }
+.mp-dlg-time { font-family: var(--font-mono); font-size: 11px; color: var(--tx3); }
+.mp-dlg-sub { font-size: 12px; color: var(--tx2); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mp-unread-pill {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--app-brand);
+  color: var(--app-brand-tx);
+}
+
+/* ЭКРАН Б ВНУТРИ ТЕЛЕФОНА: ОТКРЫТЫЙ ДИАЛОГ ПОДДЕРЖКИ / АССИСТЕНТА БАНКА */
+.mp-chat-subheader {
+  padding: 10px 16px;
+  background: var(--app-surf);
+  border-bottom: 1px solid var(--app-bd);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mp-chat-feed {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--app-bg);
+}
+
+.mp-date-divider {
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--tx3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+}
+
+.mp-msg-bot {
+  max-width: 92%;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+  border-radius: 8px 8px 8px 2px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.mp-msg-user {
+  align-self: flex-end;
+  max-width: 85%;
+  background: var(--app-user-msg);
+  color: var(--app-user-tx);
+  border-radius: 8px 8px 2px 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+/* НАТИВНЫЙ ВИДЖЕТ-КАРТОЧКА ВНУТРИ ЧАТА БАНКА (КАК В Т-БАНКЕ / СБЕРЕ / АЛЬФЕ) */
+.mp-widget-card {
+  margin-top: 10px;
+  background: var(--bg);
+  border: 1px solid var(--app-bd);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.mp-wc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--app-bd);
+  margin-bottom: 8px;
+}
+
+.mp-wc-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.mp-wc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--tx2);
+}
+.mp-wc-row b { color: var(--tx); font-weight: 600; }
+
+.mp-wc-btn {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--app-brand);
+  color: var(--app-brand-tx);
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+.mp-wc-btn:hover { opacity: 0.92; }
+
+/* Быстрые чипсы-подсказки над полем ввода (характерная деталь чатов банков РФ) */
+.mp-suggest-chips {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  background: var(--app-bg);
+  border-top: 1px solid var(--app-bd);
+  flex-shrink: 0;
+}
+.mp-schip {
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--app-surf);
+  border: 1px solid var(--app-bd);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tx2);
+  white-space: nowrap;
+}
+.mp-schip:hover { color: var(--tx); border-color: var(--tx3); }
+
+.mp-input-row {
+  padding: 10px 12px;
+  background: var(--app-surf);
+  border-top: 1px solid var(--app-bd);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* НИЖНИЙ НАТИВНЫЙ TABBAR МОБИЛЬНОГО БАНКА (5 ИКОНОК) */
+.mp-bottom-nav {
+  height: 56px;
+  background: var(--app-surf);
+  border-top: 1px solid var(--app-bd);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  flex-shrink: 0;
+}
+.mp-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--tx3);
+  position: relative;
+}
+.mp-tab-item.active {
+  color: var(--app-brand);
+  font-weight: 700;
+}
+
+/* ВЫЕЗЖАЮЩИЙ СНИЗУ ТЕЛЕФОНА WEBVIEW MINI-APP (BOTTOM SHEET) */
+.mp-webview-sheet {
+  position: absolute;
+  inset: 44px 0 0 0;
+  background: var(--bg);
+  border-top: 1px solid var(--bd-strong);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.85);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(105%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mp-webview-sheet.open {
+  transform: translateY(0);
+}
+
+.mp-sheet-bar {
+  padding: 10px 14px;
+  background: var(--surf);
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ПРАВАЯ ПАНЕЛЬ ДЕМО-ЭКРАНА: ПОЛНЫЙ КОНТРОЛЛЕР MINI-APP И ЛЕНТЫ ОПЕРАЦИЙ */
+.inspector-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inspector-box {
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ma-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--bd);
+  background: var(--surf);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ma-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--bd);
+  background: var(--bg);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ma-tab {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tx2);
+  border: 1px solid transparent;
+}
+.ma-tab.active {
+  background: var(--surf);
+  color: var(--tx);
+  border-color: var(--bd-strong);
+}
+
+.ma-body { padding: 24px; }
+
+/* KPI И СПИСОК КЕЙСОВ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.panel-card {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.kpi-lbl {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tx2);
+  margin-bottom: 6px;
+}
+
+.kpi-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--tx);
+  letter-spacing: -0.02em;
+}
+.kpi-val.accent { color: var(--accent); }
+.kpi-sub { font-size: 11.5px; color: var(--tx3); margin-top: 4px; }
+
+.case-list { display: flex; flex-direction: column; gap: 8px; }
+
+.case-row {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.case-row:hover { border-color: var(--bd-strong); }
+
+.case-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--surf);
+  border: 1px solid var(--bd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx2);
+}
+
+.case-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.verify-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--bd-strong);
+  color: var(--tx2);
+}
+.verify-tag.ok { color: var(--tx); border-color: var(--tx3); }
+
+.case-meta { font-size: 11.5px; color: var(--tx2); display: flex; gap: 8px; flex-wrap: wrap; }
+
+.case-amt {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+.case-amt small {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  color: var(--tx3);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.st-badge {
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid var(--bd-strong);
+  color: var(--tx2);
+}
+.st-badge.new { color: var(--accent); border-color: var(--accent); }
+.st-badge.sent, .st-badge.won { color: var(--tx); border-color: var(--tx3); background: var(--surf); }
+
+/* СЕКЦИЯ 3: БЛОК ДЛЯ IT-ДИРЕКТОРОВ */
+.code-terminal {
+  background: #08090B;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  padding: 20px;
+  font: 12.5px/1.6 var(--font-mono);
+  color: var(--tx);
+  overflow-x: auto;
+  margin-top: 12px;
+}
+.code-terminal .c-com { color: var(--tx3); }
+.code-terminal .c-key { color: var(--tx2); }
+.code-terminal .c-str { color: var(--accent); }
+
+/* МОДАЛЬНОЕ ОКНО */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 24px;
+}
+.mask.active { display: flex; }
+
+.modal {
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  border-radius: 8px;
+  max-width: 820px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+}
+
+.modal-h {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--bd);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.modal-b { padding: 24px; max-height: 70vh; overflow-y: auto; }
+.modal-f {
+  padding: 16px 24px;
+  border-top: 1px solid var(--bd);
+  background: var(--bg);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--bd);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+.tab-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tx2);
+  border: 1px solid transparent;
+}
+.tab-btn.active {
+  background: var(--bg);
+  color: var(--tx);
+  border-color: var(--bd-strong);
+}
+
+.letter-box {
+  width: 100%;
+  min-height: 180px;
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  padding: 16px;
+  font: 12px/1.6 var(--font-mono);
+  color: var(--tx);
+  resize: vertical;
+}
+
+.verify-box {
+  background: var(--bg);
+  border: 1px solid var(--bd-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.verify-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.v-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tx);
+  transition: border-color 0.15s;
+}
+.v-btn:hover { border-color: var(--accent); }
+
+.esia-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--tx2);
+}
+.esia-banner b { color: var(--tx); }
+
+.push-popup {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  width: 380px;
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  z-index: 400;
+}
+
+.toasts {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 500;
+}
+.toast {
+  background: var(--surf);
+  border: 1px solid var(--bd-strong);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+}
+
+input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+@media (max-width: 1120px) {
+  .hero-stage, .demo-stage-grid, .kpi-grid { grid-template-columns: 1fr; }
+  .mobile-bank-phone { margin: 0 auto; width: 100%; max-width: 420px; }
+  .case-row { grid-template-columns: auto 1fr; }
+}
+</style>
+</head>
+<body>
+
+<input type="file" id="fileInput" class="hidden" accept=".pdf,.csv,.txt,.json,.xlsx,.xls" onchange="handleRealFile(this.files[0])">
+
+<header class="topbar">
+  <a href="javascript:void(0)" class="brand" onclick="nav('hero')">
+    E—BANK <span>MINI-APP SDK</span>
+  </a>
+
+  <nav class="nav-capsules">
+    <button class="nav-cap active" data-p="hero" onclick="nav('hero')">Обложка продукта</button>
+    <button class="nav-cap" data-p="banklk" onclick="nav('banklk')">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Демо: ЛК Банка + Чат Mini-App
+      <span class="cap-count" id="badgeCount">4</span>
+    </button>
+    <button class="nav-cap" data-p="b2bsdk" onclick="nav('b2bsdk')">
+      <svg class="ico" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Внедрение в Банк (1 день) + ROI
+    </button>
+  </nav>
+
+  <div class="top-right">
+    <button class="btn-secondary btn-sm" onclick="openOpenBankingModal()">
+      <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="11" rx="1"/><path d="M12 3L2 10h20L12 3z"/></svg>
+      OpenAPI ЦБ РФ (Мультибанк)
+    </button>
+    <button class="btn-secondary btn-sm" onclick="checkBackendStatus()">
+      <span id="apiDot" class="status-dot"></span>
+      <span id="apiText">FastAPI + ЕСИА</span>
+    </button>
+    <button class="btn-primary btn-sm" onclick="simulateIncomingSMS()">
+      СМС-ПУШ + HOLD 24Ч
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ================= ЭКРАН 1: ПРЕЗЕНТАЦИОННЫЙ HERO ================= -->
+  <section id="page-hero" class="page">
+    <div class="hero-stage">
+      <div class="hero-left">
+        <div class="hero-kicker">
+          <span>B2B2C INFRASTRUCTURE</span>
+          <span>/</span>
+          <span>152-ФЗ · 308-ФЗ · 3854-У</span>
+        </div>
+
+        <h1 class="hero-h1">
+          ТВОЙ БАНК ВИДИТ,<br>
+          ГДЕ ТЕБЯ ОБМАНУЛИ.
+          <span class="accent-line">И САМ ВЕРНЁТ ДЕНЬГИ!</span>
+        </h1>
+
+        <div class="hero-two-cols">
+          <div>
+            Готовый <b>WebView Mini-App</b>, который встраивается прямо в раздел «Чаты / Поддержка» мобильного банка (как Mini-App в Telegram). Клиенту не нужно скачивать выписки — ИИ сам анализирует транзакции внутри контура банка.
+          </div>
+          <div>
+            Доступ к ИИ-агенту включён в стандартное «СМС-информирование» (<span class="mono-num">99 ₽/мес</span>) с <b><span class="mono-num">0%</span> комиссии с возврата</b>. Поддерживает <b>OpenAPI ЦБ РФ</b> (стягивание возвратов из чужих банков), <b>Pre-Auth Hold 24ч</b> и мандат <b>Госуслуг (ЕСИА)</b>.
+          </div>
+        </div>
+
+        <div class="hero-cta-row">
+          <button class="btn-primary" onclick="openBankDemoWithMiniApp()">
+            ЗАПУСТИТЬ ДЕМО-БАНК (ЧАТ + MINI-APP)
+            <svg class="ico" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <button class="btn-secondary" onclick="nav('b2bsdk')">
+            Как банк встроит это за 1 день
+          </button>
+        </div>
+
+        <div class="partners-strip">
+          <span>МИР · НСПК</span>
+          <span>OPEN API ЦБ РФ</span>
+          <span>ЕСИА ГОСУСЛУГИ</span>
+          <span>ФНС ОФД</span>
+        </div>
+      </div>
+
+      <!-- ЧИСТЫЙ МАКЕТ МОБИЛЬНОГО УСТРОЙСТВА -->
+      <div class="phone-showcase">
+        <div class="device-frame">
+          <div class="device-statusbar">
+            <span>09:41 · BANK WEBVIEW SDK</span>
+            <span>LTE · 100%</span>
+          </div>
+
+          <div class="card-stack">
+            <div class="spec-card">
+              <div class="spec-head">
+                <span>MIR SUPREME</span>
+                <span class="spec-tag">СМС-БАНК · 99 ₽</span>
+              </div>
+              <div class="spec-number">2469 2335 5662 ****</div>
+              <div class="spec-foot">
+                <div>Формат работы<b>Mini-App в Чате Банка</b></div>
+                <div style="text-align:right">Найдено к возврату<b class="accent-val">+63 429 ₽</b></div>
+              </div>
+            </div>
+
+            <div class="spec-card">
+              <div class="spec-head">
+                <span>E-BANK SHIELD</span>
+                <span class="spec-tag">PRE-AUTH HOLD 24H</span>
+              </div>
+              <div class="spec-number">7860 5645 1245 ****</div>
+              <div class="spec-foot">
+                <div>Интеграция в банк<b>Drop-in WebView SDK</b></div>
+                <div style="text-align:right">Комиссия<b class="mono-num">0% (Тариф)</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЭКРАН 2: ТОЧНАЯ ИМИТАЦИЯ РАЗДЕЛА «ЧАТЫ» 4 БАНКОВ РФ + WEBVIEW MINI-APP ================= -->
+  <section id="page-banklk" class="page hidden">
+    <div class="bank-switcher-bar">
+      <div>
+        <div style="font-weight:700;font-size:14px">Живой хамелеон White-Label: выберите банк для демонстрации жюри</div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:2px">Полностью повторяет реальную структуру раздела «Чаты», сторис-каналов, карточек ассистента и нижнего TabBar каждого банка</div>
+      </div>
+      <div class="bs-chips">
+        <button class="bs-chip active" onclick="setBankTheme('tbank', 'Т-Банк Онлайн', '#FFDD2D', '#111111', this)">
+          <span class="b-dot" style="background:#FFDD2D"></span>Т-Банк (Т-Помощь)
+        </button>
+        <button class="bs-chip" onclick="setBankTheme('sber', 'СберБанк Онлайн', '#21A038', '#FFFFFF', this)">
+          <span class="b-dot" style="background:#21A038"></span>СберБанк (Салют)
+        </button>
+        <button class="bs-chip" onclick="setBankTheme('vtb', 'ВТБ Онлайн', '#009FDF', '#FFFFFF', this)">
+          <span class="b-dot" style="background:#009FDF"></span>ВТБ (Помощник)
+        </button>
+        <button class="bs-chip" onclick="setBankTheme('alfa', 'Альфа-Банк', '#EF3124', '#FFFFFF', this)">
+          <span class="b-dot" style="background:#EF3124"></span>Альфа-Банк (Чат)
+        </button>
+      </div>
+    </div>
+
+    <div class="demo-stage-grid">
+      <!-- ЛЕВАЯ ЧАСТЬ: РЕАЛИСТИЧНЫЙ СМАРТФОН С НАТИВНЫМ РАЗДЕЛОМ «ЧАТЫ» ВЫБРАННОГО БАНКА -->
+      <div class="mobile-bank-phone" id="mobileBankPhone">
+        <div class="mp-statusbar">
+          <span>09:41</span>
+          <span id="lkBankName">Т-Банк Онлайн</span>
+          <span>5G · 100%</span>
+        </div>
+
+        <!-- Шапка раздела «Чаты» в мобильном банке -->
+        <div class="mp-appbar">
+          <div class="mp-appbar-top">
+            <div style="font-weight:700;font-size:18px" id="mpHeaderTitle">Чаты</div>
+            <div class="mp-view-switch">
+              <button class="mp-vbtn" id="btnShowList" onclick="switchPhoneScreen('list')">Список</button>
+              <button class="mp-vbtn active" id="btnShowChat" onclick="switchPhoneScreen('chat')">Диалог</button>
+            </div>
+          </div>
+          <div class="mp-search-bar" id="mpSearchPlaceholder">
+            <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span id="mpSearchText">Поиск по чатам и операциям</span>
+          </div>
+        </div>
+
+        <!-- ЭКРАН СПИСКА ДИАЛОГОВ И КАНАЛОВ (КАК В РЕАЛЬНОМ ТАБЕ «ЧАТЫ») -->
+        <div class="mp-screen hidden" id="phoneScreenList">
+          <!-- Горизонтальная карусель каналов банка -->
+          <div class="mp-channels-row" id="mpChannelsRow"></div>
+
+          <!-- Список диалогов (Поддержка, Уведомления, Кэшбэк) -->
+          <div class="mp-dialogs-scroll" id="mpDialogsList"></div>
+        </div>
+
+        <!-- ЭКРАН ОТКРЫТОГО ЧАТА ПОДДЕРЖКИ / АССИСТЕНТА БАНКА -->
+        <div class="mp-screen" id="phoneScreenChat">
+          <div class="mp-chat-subheader">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="switchPhoneScreen('list')" style="color:var(--tx2);font-size:16px;padding-right:4px">←</button>
+              <div class="mp-avatar" id="mpBotAvatar" style="width:32px;height:32px;font-size:13px">Т</div>
+              <div>
+                <div style="font-weight:700;font-size:13px" id="mpBotName">Поддержка Т-Банка · ИИ-Ассистент</div>
+                <div style="font-size:10.5px;color:var(--tx2)" id="mpBotSub">Официальный чат · Защищено 152-ФЗ</div>
+              </div>
+            </div>
+            <button class="btn-secondary btn-sm" style="padding:5px 10px;font-size:11px" onclick="toggleMiniApp(true)">Mini-App</button>
+          </div>
+
+          <!-- Лента сообщений внутри телефона -->
+          <div class="mp-chat-feed" id="chatMessagesBox">
+            <div class="mp-date-divider">Сегодня · Автоаудит по подписке 99 ₽/мес</div>
+
+            <div class="mp-msg-bot">
+              <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;display:flex;justify-content:space-between">
+                <span id="mpMsgSender">ИИ-Рекуператор банка</span>
+                <span class="mono-num">14:20</span>
+              </div>
+              Алексей, вам <b>не нужно загружать выписки вручную</b>. Я проверил операции по карте <b class="mono-num">*5662</b> через чеки ФНС ОФД и базу Росавиации.
+
+              <!-- Нативная банковская карточка-виджет внутри сообщения -->
+              <div class="mp-widget-card">
+                <div class="mp-wc-head">
+                  <span style="font-size:11.5px;font-weight:600">Найдено 4 возврата (0% комиссия)</span>
+                  <span class="mono-num" style="font-size:14px;font-weight:700;color:var(--accent)" id="chatSumBadge">+63 429 ₽</span>
+                </div>
+                <div class="mp-wc-rows">
+                  <div class="mp-wc-row"><span>[АВИА] Аэрофлот SU-1402</span><b class="mono-num">28 740 ₽</b></div>
+                  <div class="mp-wc-row"><span>[СТРАХОВАНИЕ] Росгосстрах (3854-У)</span><b class="mono-num">18 900 ₽</b></div>
+                  <div class="mp-wc-row"><span>[ДУБЛЬ] Apple / re:Store (4543)</span><b class="mono-num">14 990 ₽</b></div>
+                  <div class="mp-wc-row"><span>[ПОДПИСКА] Кинотеатр Иви (308-ФЗ)</span><b class="mono-num">799 ₽</b></div>
+                </div>
+                <button class="mp-wc-btn" onclick="toggleMiniApp(true)">
+                  <span>Открыть Mini-App и вернуть <span id="inlineBtnSum" class="mono-num">63 429 ₽</span></span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Чипсы быстрых действий над клавиатурой (как в Т-Банке, Сбере, ВТБ и Альфе) -->
+          <div class="mp-suggest-chips">
+            <button class="mp-schip" onclick="toggleMiniApp(true)">Открыть Рекуператор (Mini-App)</button>
+            <button class="mp-schip" onclick="openOpenBankingModal()">Стянуть из другого банка</button>
+            <button class="mp-schip" onclick="simulateIncomingSMS()">Тест Hold 24ч</button>
+          </div>
+
+          <!-- Поле ввода сообщения в банке -->
+          <div class="mp-input-row">
+            <button class="btn-secondary btn-sm" style="padding:6px 8px" onclick="document.getElementById('fileInput').click()" title="Прикрепить чек или PDF">+</button>
+            <input type="text" placeholder="Сообщение в банк..." style="flex:1;font-size:12.5px;color:var(--tx)" onkeydown="if(event.key==='Enter')sendChatMessage(this)">
+            <button class="btn-secondary btn-sm" style="padding:6px 10px" onclick="toggleMiniApp(true)">WebView</button>
+          </div>
+        </div>
+
+        <!-- НИЖНИЙ TABBAR МОБИЛЬНОГО БАНКА (АВТОМАТИЧЕСКИ МЕНЯЕТ ВКЛАДКИ ПОД БАНК) -->
+        <nav class="mp-bottom-nav" id="mpBottomNav"></nav>
+
+        <!-- ВЫЕЗЖАЮЩИЙ СНИЗУ ЭКРАНА ТЕЛЕФОНА НАТИВНЫЙ BOTTOM-SHEET MINI-APP -->
+        <div class="mp-webview-sheet" id="phoneMiniAppSheet">
+          <div class="mp-sheet-bar">
+            <div>
+              <div style="font-weight:700;font-size:12.5px">РЕКУПЕРАТОР · WebView Mini-App</div>
+              <div class="mono-num" style="font-size:10px;color:var(--tx2)">Контур банка · ЕСИА · НСПК Мир</div>
+            </div>
+            <button class="btn-secondary btn-sm" style="padding:4px 10px;font-size:11px" onclick="toggleMiniApp(false)">Закрыть ✕</button>
+          </div>
+          <div style="padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px" id="phoneSheetCasesList"></div>
+          <div style="padding:12px 14px;border-top:1px solid var(--bd);background:var(--surf)">
+            <button class="mp-wc-btn" onclick="sendAllCases()">Зачислить все возвраты на карту *5662</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ПРАВАЯ КОЛОНКА: РАЗВЁРНУТАЯ ПАНЕЛЬ УПРАВЛЕНИЯ MINI-APP И ТРАНЗАКЦИЙ ДЛЯ ЖЮРИ -->
+      <div class="inspector-column">
+        <div class="inspector-box" id="miniAppDrawer">
+          <div class="ma-header">
+            <div>
+              <div style="font-weight:700;font-size:15px">Инспектор Mini-App (Развёрнутый вид для жюри)</div>
+              <div style="font-size:12px;color:var(--tx2)" id="agentSourceSub">Автоматическая синхронизация с процессингом банка, ФНС ОФД и ЕСИА</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn-secondary btn-sm" onclick="openOpenBankingModal()">Стянуть из Сбера/ВТБ (OpenAPI)</button>
+              <button class="btn-secondary btn-sm" onclick="document.getElementById('fileInput').click()">+ Внешний PDF/CSV</button>
+              <button class="btn-primary btn-sm" onclick="toggleMiniApp(true)">Показать шторку на телефоне</button>
+            </div>
+          </div>
+
+          <div class="ma-tabs">
+            <button class="ma-tab active" id="tabBtnCases" onclick="switchMiniAppView('cases')">
+              Готовые возвраты (<span id="maCasesCnt" class="mono-num">4</span>)
+            </button>
+            <button class="ma-tab" id="tabBtnSubs" onclick="switchMiniAppView('subs')">
+              Радар подписок и Hold 24ч (<span id="maSubsCnt" class="mono-num">3</span>)
+            </button>
+            <div style="flex:1"></div>
+            <button class="btn-primary btn-sm" onclick="sendAllCases()">Вернуть всё в 1 клик</button>
+          </div>
+
+          <div class="ma-body">
+            <div id="maViewCases">
+              <div class="kpi-grid">
+                <div class="panel-card">
+                  <div class="kpi-lbl">Доступно к возврату</div>
+                  <div class="kpi-val accent" id="kpiTotal">0 ₽</div>
+                  <div class="kpi-sub">100% зачисляется на карту</div>
+                </div>
+                <div class="panel-card">
+                  <div class="kpi-lbl">Уже возвращено</div>
+                  <div class="kpi-val" id="kpiWon">0 ₽</div>
+                  <div class="kpi-sub">НСПК «Мир» и ЕСИА ЭЗП</div>
+                </div>
+                <div class="panel-card">
+                  <div class="kpi-lbl">Тариф защиты</div>
+                  <div class="kpi-val">99 ₽<span style="font-size:13px;color:var(--tx2)">/мес</span></div>
+                  <div class="kpi-sub">Включено в СМС-Банк (0% ком.)</div>
+                </div>
+                <div class="panel-card">
+                  <div class="kpi-lbl">Окупаемость СМС</div>
+                  <div class="kpi-val" id="kpiBenefit">x0</div>
+                  <div class="kpi-sub">Выгода клиента к 99 ₽</div>
+                </div>
+              </div>
+
+              <div class="case-list" id="casesContainer"></div>
+            </div>
+
+            <div id="maViewSubs" class="hidden">
+              <div class="panel-card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+                <div>
+                  <div style="font-weight:700;font-size:14px">Превентивный Hold 24ч и отзыв токенов по ФЗ № 308-ФЗ (ст. 16.1 ЗоЗПП)</div>
+                  <div style="font-size:12px;color:var(--tx2);margin-top:2px">Замораживаем автосписания до клиринга (полный обход ст. 429.4 ГК РФ об абонентском договоре)</div>
+                </div>
+                <button class="btn-primary btn-sm" onclick="cancelAllSubscriptions()">Отозвать все токены в НСПК</button>
+              </div>
+              <div class="case-list" id="subsContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЭКРАН 3: ВСТРАИВАНИЕ В БАНК ЗА 1 ДЕНЬ (SDK КОД) + B2B ROI ================= -->
+  <section id="page-b2bsdk" class="page hidden">
+    <div style="max-width:1120px;margin:0 auto">
+      <div class="hero-kicker">Архитектура Zero-Core Integration для IT-директоров жюри</div>
+      <h2 style="font-family:var(--font-display);font-size:28px;text-transform:uppercase;margin-bottom:24px;letter-spacing:-0.02em">
+        Как банк встраивает Mini-App в свой чат за 1 день (3 строки кода)
+      </h2>
+
+      <div style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:24px;margin-bottom:32px">
+        <div class="panel-card">
+          <div class="kpi-lbl">Готовый сниппет для мобильного WebView / Чат-бота банка</div>
+          <pre class="code-terminal"><span class="c-com">&lt;!-- Встраивание внутри раздела "Чат поддержки" --&gt;</span>
+&lt;script src=<span class="c-str">"https://recuperator.internal.bank/sdk/miniapp.js"</span>&gt;&lt;/script&gt;
+&lt;script&gt;
+  BankRecuperatorMiniApp.mount({
+    <span class="c-key">container</span>: <span class="c-str">'#bank-chat-webview'</span>,
+    <span class="c-key">auth</span>: <span class="c-str">'ESIA_JWT_TOKEN'</span>,
+    <span class="c-key">kafkaTopic</span>: <span class="c-str">'sms-notifications-stream'</span>, <span class="c-com">// Read-Only</span>
+    <span class="c-key">absAccountDebit</span>: <span class="c-str">'30232810400000000105'</span>, <span class="c-com">// Расчёты НСПК Мир</span>
+    <span class="c-key">absAccountCredit</span>: <span class="c-str">'40817810************'</span> <span class="c-com">// Счёт физлица</span>
+  });
+&lt;/script&gt;</pre>
+        </div>
+
+        <div class="panel-card">
+          <div class="kpi-lbl">Почему служба ИБ банка согласует пилот за 24 часа</div>
+          <div style="display:flex;flex-direction:column;gap:16px;font-size:13px;margin-top:16px;color:var(--tx2)">
+            <div><b style="color:var(--tx)">1. On-Premise Docker в контуре банка:</b> Ни один байт ПДн (152-ФЗ) не покидает периметр банка.</div>
+            <div><b style="color:var(--tx)">2. Read-Only подписка на Kafka СМС-банка:</b> 0% нагрузки на АБС (ЦФТ / Диасофт) — читаем тот же поток, что идёт в пуши.</div>
+            <div><b style="color:var(--tx)">3. Готовые проводки АБС:</b> Автоформирование ордеров по счетам ЦБ РФ <code class="mono-num">30232</code> → <code class="mono-num">40817</code>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card" style="margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+          <span style="font-weight:600;font-size:14px">Калькулятор выручки банка — активная розничная база (млн клиентов):</span>
+          <b id="roiUsersVal" class="mono-num" style="color:var(--accent);font-size:22px">10 млн чел.</b>
+        </div>
+        <input type="range" id="roiSlider" min="1" max="50" value="10" oninput="calcBankROI()">
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="panel-card">
+          <div class="kpi-lbl">Выручка от подписки 99 ₽/мес</div>
+          <div class="kpi-val accent" id="roiBankRev">3.33 млрд ₽</div>
+          <div class="kpi-sub">Чистый комиссионный доход в год</div>
+        </div>
+        <div class="panel-card">
+          <div class="kpi-lbl">Приток пассивов из чужих банков</div>
+          <div class="kpi-val" id="roiLiquidity">+42.0 млрд ₽</div>
+          <div class="kpi-sub">Переток возвратов через OpenAPI ЦБ РФ</div>
+        </div>
+        <div class="panel-card">
+          <div class="kpi-lbl">Снижение оттока из СМС-банка</div>
+          <div class="kpi-val">-42% Churn</div>
+          <div class="kpi-sub">Рост NPS мобильного банка +19 п.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ КЕЙСА -->
+<div class="mask" id="modalMask" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div id="pushZone"></div>
+<div class="toasts" id="toastZone"></div>
+
+<script>
+const API_BASE = 'http://localhost:8000/api';
+const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+
+/* ТОЧНЫЕ UI-ПРОФИЛИ МОБИЛЬНЫХ ПРИЛОЖЕНИЙ БАНКОВ РФ (Т-БАНК, СБЕР, ВТБ, АЛЬФА) */
+const BANK_UI_PROFILES = {
+  tbank: {
+    name: 'Т-Банк Онлайн',
+    headerTitle: 'Чаты',
+    searchPlaceholder: 'Поиск по чатам и Т-Помощи',
+    botAvatar: 'Т',
+    botName: 'Поддержка Т-Банка · ИИ-Рекуператор',
+    botSub: 'Т-Помощь · Защищено 152-ФЗ',
+    brandColor: '#FFDD2D',
+    brandText: '#111111',
+    channels: [
+      { code: 'AI', name: 'Рекуператор', unread: true },
+      { code: 'УВ', name: 'Уведомления', unread: true },
+      { code: 'ТИ', name: 'Инвестиции', unread: false },
+      { code: 'АВ', name: 'Путешествия', unread: false },
+      { code: 'КБ', name: 'Кэшбэк дня', unread: false }
+    ],
+    dialogs: [
+      { ava: 'Т', primary: true, title: 'Поддержка Т-Банка', time: '14:20', sub: 'ИИ-Рекуператор: найдено 4 возврата по карте *5662 на 63 429 ₽', badge: '4' },
+      { ava: '99₽', primary: false, title: 'Оповещения об операциях', time: '14:18', sub: 'Списание 18 740 ₽ AEROFLOT. Проверить рейс SU-1402', badge: '' },
+      { ava: 'ПУ', primary: false, title: 'Т-Путешествия', time: 'Вчера', sub: 'Статус вашего бронирования Москва — Сочи обновлён', badge: '' }
+    ],
+    tabs: [
+      { label: 'Главная', active: false },
+      { label: 'Платежи', active: false },
+      { label: 'Город', active: false },
+      { label: 'Чаты', active: true },
+      { label: 'Ещё', active: false }
+    ]
+  },
+  sber: {
+    name: 'СберБанк Онлайн',
+    headerTitle: 'Ассистент Салют и Чаты',
+    searchPlaceholder: 'Спросите Салют или найдите диалог',
+    botAvatar: 'С',
+    botName: 'Салют · ИИ-Рекуператор Сбера',
+    botSub: 'Финансовый защитник · СберПрайм / Уведомления',
+    brandColor: '#21A038',
+    brandText: '#FFFFFF',
+    channels: [
+      { code: 'СБ', name: 'Салют ИИ', unread: true },
+      { code: '900', name: 'Номер 900', unread: true },
+      { code: 'СП', name: 'Спасибо', unread: false },
+      { code: 'СТ', name: 'Страхование', unread: false },
+      { code: 'ЖК', name: 'Дом и ЖКХ', unread: false }
+    ],
+    dialogs: [
+      { ava: 'С', primary: true, title: 'Ассистент Салют · Защита средств', time: '14:20', sub: 'Проверил ваши чеки ФНС: доступно к возврату 63 429 ₽ без комиссии', badge: '4' },
+      { ava: '900', primary: false, title: 'Уведомления 900 (99 ₽/мес)', time: '14:15', sub: 'MIR-5662 Покупка 18 900р РОСГОССТРАХ. Доступен возврат в период охлаждения', badge: '' },
+      { ava: 'ДК', primary: false, title: 'Диалоги с поддержкой', time: 'Вчера', sub: 'Ваше обращение по полису сформировано через ЕСИА', badge: '' }
+    ],
+    tabs: [
+      { label: 'Главный', active: false },
+      { label: 'Накопления', active: false },
+      { label: 'Платежи', active: false },
+      { label: 'История', active: false },
+      { label: 'Ассистент', active: true }
+    ]
+  },
+  vtb: {
+    name: 'ВТБ Онлайн',
+    headerTitle: 'Чат с банком',
+    searchPlaceholder: 'Поиск по сообщениям ВТБ',
+    botAvatar: 'ВТБ',
+    botName: 'Помощник ВТБ · ИИ-Рекуператор',
+    botSub: 'Онлайн-оспаривание операций ПС «Мир»',
+    brandColor: '#009FDF',
+    brandText: '#FFFFFF',
+    channels: [
+      { code: 'ИИ', name: 'Рекуператор', unread: true },
+      { code: 'ПУШ', name: 'Пакет ПУШ', unread: true },
+      { code: 'МБ', name: 'Мультибонус', unread: false },
+      { code: 'БЛ', name: 'Близкие', unread: false }
+    ],
+    dialogs: [
+      { ava: 'ВТБ', primary: true, title: 'Чат с ВТБ (ИИ-Рекуператор)', time: '14:20', sub: 'Готово 4 требования на возврат 63 429 ₽ по карте Мир *5662', badge: '4' },
+      { ava: 'SMS', primary: false, title: 'Уведомления ВТБ-Онлайн', time: '13:50', sub: 'Pre-Auth Hold: заморожено списание подписки до вашего подтверждения', badge: '' }
+    ],
+    tabs: [
+      { label: 'Главная', active: false },
+      { label: 'Платежи', active: false },
+      { label: 'Чат', active: true },
+      { label: 'История', active: false },
+      { label: 'Профиль', active: false }
+    ]
+  },
+  alfa: {
+    name: 'Альфа-Банк',
+    headerTitle: 'Чат и Альфа-Помощник',
+    searchPlaceholder: 'Найти в чате Альфа-Банка',
+    botAvatar: 'А',
+    botName: 'Альфа-Помощник · Рекуператор',
+    botSub: 'Возврат комиссий, страховок и чарджбэк',
+    brandColor: '#EF3124',
+    brandText: '#FFFFFF',
+    channels: [
+      { code: 'А+', name: 'Рекуператор', unread: true },
+      { code: 'АЧ', name: 'Альфа-Чек', unread: true },
+      { code: 'ТР', name: 'Тревел', unread: false },
+      { code: 'КБ', name: 'Кэшбэк', unread: false }
+    ],
+    dialogs: [
+      { ava: 'А', primary: true, title: 'Альфа-Помощник (ИИ-Рекуператор)', time: '14:20', sub: 'Найдено 63 429 ₽ к возврату по Альфа-Карте *5662 (0% комиссии)', badge: '4' },
+      { ava: 'АЧ', primary: false, title: 'Альфа-Чек (99 ₽/мес)', time: '14:10', sub: 'Двойное списание Apple 14 990 ₽ — открыть спор в 1 клик', badge: '' }
+    ],
+    tabs: [
+      { label: 'Главный', active: false },
+      { label: 'Платежи', active: false },
+      { label: 'Выгода', active: false },
+      { label: 'Чат', active: true },
+      { label: 'Профиль', active: false }
+    ]
+  }
+};
+
+function renderCaseIcon(type) {
+  const icons = {
+    avia: '<svg class="ico" viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+    insurance: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    price: '<svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+    sub: '<svg class="ico" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>'
+  };
+  return icons[type] || icons.price;
+}
+
+let cases = [
+  {
+    id: 'case-101', type: 'avia', icon: 'AVIA',
+    title: 'Проверка авиаперелёта SU-1402 (Москва — Сочи)',
+    merchant: 'ПАО «Аэрофлот»', date: '12.10.2026', amount: 28740, baseAmount: 18740, status: 'new',
+    verified: false,
+    verifyPrompt: 'Откуда данные: чек ФНС ОФД (билет 18 740 ₽) + шлюз Росавиации. Уточните статус рейса SU-1402:',
+    verifyOptions: [
+      { code: 'flight_cancelled', label: 'Рейс ОТМЕНЁН перевозчиком (100% возврат билета + убытки)' },
+      { code: 'flight_delayed_4h', label: 'Рейс ЗАДЕРЖАН на 5ч 20м (Неустойка 3%/час ЗоЗПП + ВК РФ ст. 120)' },
+      { code: 'flight_overbook', label: 'Овербукинг / Отказ в посадке (Возврат + штраф 25 000 ₽)' },
+      { code: 'flight_ok', label: 'Рейс вылетел вовремя (Исключить кейс)' }
+    ],
+    dataOrigin: 'Поток операций карты *5662 · Чек ФНС ОФД ФД #849201 · Шлюз ФГИС АИС ГВФ (Росавиация)',
+    source: 'Автоперехват в контуре банка + ФНС ОФД',
+    legal: 'ВК РФ ст. 108, ст. 120 · ЗоЗПП РФ ст. 28 (3% за час задержки) · ФАП-82',
+    reasonCode: '4555 (Услуга не оказана в срок)',
+    desc: 'ИИ-агент автоматически обнаружил покупку авиабилета (рейс SU-1402) и зафиксировал сбой расписания. Выберите точный статус рейса для пересчёта законной компенсации.',
+    letter: 'ДОСУДЕБНАЯ ПРЕТЕНЗИЯ (ПО МАНДАТУ ЕСИА)\nВ ПАО «Аэрофлот»\n\nПо билету, оплаченному картой Банка (рейс SU-1402), допущено нарушение расписания. На основании ст. 120 ВК РФ и ст. 28 ЗоЗПП РФ требую перечислить компенсацию 28 740 ₽ на карту списания.'
+  },
+  {
+    id: 'case-102', type: 'insurance', icon: 'INS',
+    title: 'Навязанная страховка в период охлаждения ЦБ РФ',
+    merchant: 'ПАО СК «Росгосстрах»', date: '09.10.2026', amount: 18900, baseAmount: 18900, status: 'new',
+    verified: false,
+    verifyPrompt: 'Уточните обстоятельство оформления полиса для расчёта по закону ЦБ РФ:',
+    verifyOptions: [
+      { code: 'ins_cooling', label: 'Прошло < 30 дней с даты оформления (100% возврат по 353-ФЗ и 3854-У)' },
+      { code: 'ins_early_loan', label: 'Досрочное погашение кредита (Пропорциональный возврат 72% по ст. 11 353-ФЗ)' }
+    ],
+    dataOrigin: 'Поток операций карты *5662 · Позиция чека ОФД «Полис коллективного страхования» · МСС 6300',
+    source: 'Перехват СМС-банка · Детализация чека ОФД',
+    legal: 'Указание Банка России № 3854-У · ФЗ № 353-ФЗ ст. 7, ст. 11 (Период охлаждения 30 дней)',
+    reasonCode: '4555 (Отказ от навязанной услуги)',
+    desc: 'В чеке ОФД обнаружена позиция добровольного страхования. С момента списания прошло менее 30 дней — 100% возврат по нормативу ЦБ РФ.',
+    letter: 'ЗАЯВЛЕНИЕ ОБ ОТКАЗЕ ОТ ДОГОВОРА СТРАХОВАНИЯ (ЕСИА ПЭП)\nВ ПАО СК «Росгосстрах»\n\nНа основании Указания Банка России № 3854-У и ФЗ № 353-ФЗ заявляю об отказе от полиса в период охлаждения и требую вернуть 100% страховой премии (18 900 ₽).'
+  },
+  {
+    id: 'case-103', type: 'price', icon: 'DBL',
+    title: 'Двойное списание за покупку (Дубль авторизации)',
+    merchant: 'Apple / re:Store', date: '05.10.2026', amount: 14990, baseAmount: 14990, status: 'new',
+    verified: true,
+    verifyPrompt: 'Уточните статус операции по карте:',
+    verifyOptions: [
+      { code: 'double_confirm', label: 'Оба списания прошли, покупка одна (100% чарджбэк 4543)' },
+      { code: 'flight_ok', label: 'Вторая сумма вернулась из холда (Удалить кейс)' }
+    ],
+    dataOrigin: 'Процессинг карты *5662 · 2 идентичных RRN-кода с интервалом 40 сек',
+    source: 'Антифрод-дедупликатор банка',
+    legal: 'Ст. 1102 ГК РФ (Неосновательное обогащение) · Правила НСПК «Мир» (Код 4543)',
+    reasonCode: '4543 (Duplicate Processing / Дублирование)',
+    desc: 'Зафиксированы два идентичных списания на сумму 14 990 ₽ у одного мерчанта. Доступен мгновенный межбанковский чарджбэк.',
+    letter: 'ТРЕБОВАНИЕ ПО ДИСПУТУ НСПК (КОД 4543)\nЗафиксировано повторное списание 14 990 ₽ по одному кассовому чеку. Требуется принудительный возврат через банк-эквайер.'
+  },
+  {
+    id: 'case-104', type: 'sub', icon: 'SUB',
+    title: 'Автопродление подписки без уведомления (ФЗ № 308-ФЗ)',
+    merchant: 'Онлайн-кинотеатр Иви', date: '01.10.2026', amount: 799, baseAmount: 799, status: 'new',
+    verified: false,
+    verifyPrompt: 'Юридическое основание возврата (с учётом ст. 429.4 ГК РФ об абонентском договоре):',
+    verifyOptions: [
+      { code: 'sub_308fz', label: 'Списание с отвязанной карты / без уведомления за 24ч (100% возврат по 308-ФЗ и ст. 10 ЗоЗПП)' },
+      { code: 'sub_unused_3m', label: 'Договор услуг с 0 ₽ ФПР + запрос лояльности за 3 мес. (ст. 32 ЗоЗПП — 2 397 ₽)' },
+      { code: 'flight_ok', label: 'Пользуюсь подпиской (Оставить активной)' }
+    ],
+    dataOrigin: 'Процессинг карты *5662 · Рекуррентный токен МСС 5815 · Контроль по ФЗ № 308-ФЗ',
+    source: 'Радар рекуррентных платежей',
+    legal: 'ФЗ № 308-ФЗ (ст. 16.1 ЗоЗПП РФ) · ст. 10, 12, 32 ЗоЗПП РФ',
+    reasonCode: '4541 (Отмена рекуррентного платежа)',
+    desc: 'Оспаривание через нарушение ст. 10 ЗоЗПП и ФЗ № 308-ФЗ, а также установка Pre-Auth Hold на будущие списания.',
+    letter: 'ПРЕТЕНЗИЯ ПО ФЗ № 308-ФЗ И СТ. 10, 32 ЗОЗПП РФ\nНа основании ст. 16.1 и ст. 32 ЗоЗПП требую отменить рекуррентные списания и вернуть средства.'
+  }
+];
+
+let subscriptions = [
+  { id: 'sub-1', merchant: 'Онлайн-кинотеатр Иви', monthlyAmount: 799, annualAmount: 9588, lastDate: '01.10.2026', nextChargeInDays: 3, legal: 'Pre-Auth Hold 24ч + Отзыв токена карты в НСПК по ФЗ № 308-ФЗ', active: true },
+  { id: 'sub-2', merchant: 'Яндекс Плюс Мульти', monthlyAmount: 399, annualAmount: 4788, lastDate: '04.10.2026', nextChargeInDays: 6, legal: 'Pre-Auth Hold 24ч + Запрет списаний без подтверждения (ст. 16.1 ЗоЗПП)', active: true },
+  { id: 'sub-3', merchant: 'Образовательная платформа SkillBox', monthlyAmount: 4900, annualAmount: 58800, lastDate: '25.09.2026', nextChargeInDays: 2, legal: 'Возврат за вычетом ФПР по ст. 32 ЗоЗПП РФ + Блокировка автоплатежа', active: true }
+];
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toastZone').appendChild(el);
+  setTimeout(() => el.remove(), 3600);
+}
+
+function nav(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById('page-' + pageId).classList.remove('hidden');
+  document.querySelectorAll('.nav-cap').forEach(b => b.classList.toggle('active', b.dataset.p === pageId));
+  renderDashboard();
+  renderSubscriptions();
+}
+
+function switchPhoneScreen(mode) {
+  document.getElementById('phoneScreenList').classList.toggle('hidden', mode !== 'list');
+  document.getElementById('phoneScreenChat').classList.toggle('hidden', mode !== 'chat');
+  document.getElementById('btnShowList').classList.toggle('active', mode === 'list');
+  document.getElementById('btnShowChat').classList.toggle('active', mode === 'chat');
+}
+
+function openBankDemoWithMiniApp() {
+  nav('banklk');
+  switchPhoneScreen('chat');
+  toast('Открыт раздел «Чаты» мобильного банка. Нажмите на кнопку внутри сообщения бота, чтобы выдвинуть шторку Mini-App!');
+}
+
+function toggleMiniApp(openState) {
+  const sheet = document.getElementById('phoneMiniAppSheet');
+  if (sheet) sheet.classList.toggle('open', openState);
+}
+
+function switchMiniAppView(view) {
+  document.getElementById('maViewCases').classList.toggle('hidden', view !== 'cases');
+  document.getElementById('maViewSubs').classList.toggle('hidden', view !== 'subs');
+  document.getElementById('tabBtnCases').classList.toggle('active', view === 'cases');
+  document.getElementById('tabBtnSubs').classList.toggle('active', view === 'subs');
+}
+
+/* ПОЛНАЯ ПЕРЕРИСОВКА АРХИТЕКТУРЫ РАЗДЕЛА «ЧАТЫ» ПОД ВЫБРАННЫЙ БАНК */
+function setBankTheme(code, name, accentHex, textHex, btn) {
+  const p = BANK_UI_PROFILES[code] || BANK_UI_PROFILES.tbank;
+  document.documentElement.style.setProperty('--app-brand', p.brandColor);
+  document.documentElement.style.setProperty('--app-brand-tx', p.brandText);
+  document.documentElement.style.setProperty('--app-user-msg', p.brandColor);
+  document.documentElement.style.setProperty('--app-user-tx', p.brandText);
+
+  document.getElementById('lkBankName').textContent = p.name;
+  document.getElementById('mpHeaderTitle').textContent = p.headerTitle;
+  document.getElementById('mpSearchText').textContent = p.searchPlaceholder;
+  document.getElementById('mpBotAvatar').textContent = p.botAvatar;
+  document.getElementById('mpBotName').textContent = p.botName;
+  document.getElementById('mpBotSub').textContent = p.botSub;
+  document.getElementById('mpMsgSender').textContent = p.botName;
+
+  // Отрисовка горизонтальных сторис-каналов банка
+  document.getElementById('mpChannelsRow').innerHTML = p.channels.map(ch => `
+    <div class="mp-channel-pill" onclick="switchPhoneScreen('chat');toggleMiniApp(true)">
+      <div class="mp-ch-circle ${ch.unread ? 'unread' : ''}">
+        <span class="mono-num" style="font-size:11px;font-weight:700">${ch.code}</span>
+        ${ch.unread ? '<span class="mp-ch-dot"></span>' : ''}
+      </div>
+      <span>${ch.name}</span>
+    </div>
+  `).join('');
+
+  // Отрисовка списка диалогов в табе «Чаты»
+  document.getElementById('mpDialogsList').innerHTML = p.dialogs.map(d => `
+    <div class="mp-dlg-row ${d.primary ? 'pinned' : ''}" onclick="switchPhoneScreen('chat')">
+      <div class="mp-avatar ${d.primary ? '' : 'neutral'}">${d.ava}</div>
+      <div class="mp-dlg-main">
+        <div class="mp-dlg-head">
+          <span class="mp-dlg-title">${d.title}</span>
+          <span class="mp-dlg-time">${d.time}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div class="mp-dlg-sub">${d.sub}</div>
+          ${d.badge ? `<span class="mp-unread-pill">${d.badge}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Отрисовка нижнего TabBar конкретного банка
+  document.getElementById('mpBottomNav').innerHTML = p.tabs.map(t => `
+    <button class="mp-tab-item ${t.active ? 'active' : ''}" onclick="switchPhoneScreen('${t.active ? 'list' : 'chat'}')">
+      <span class="mono-num" style="font-size:11px">●</span>
+      <span>${t.label}</span>
+    </button>
+  `).join('');
+
+  if (btn) {
+    document.querySelectorAll('.bs-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    toast(`Интерфейс перестроен под ${p.name}`);
+  }
+}
+
+function sendChatMessage(inputEl) {
+  const txt = inputEl.value.trim();
+  if (!txt) return;
+  const box = document.getElementById('chatMessagesBox');
+  box.innerHTML += `<div class="mp-msg-user">${txt}</div>`;
+  inputEl.value = '';
+  setTimeout(() => {
+    box.innerHTML += `
+      <div class="mp-msg-bot">
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:6px"><span>ИИ-Рекуператор</span></div>
+        Запрос проверен по базе чеков ФНС ОФД и правилам НСПК «Мир». Откройте шторку Mini-App для подтверждения возврата:
+        <div style="margin-top:8px">
+          <button class="mp-wc-btn" onclick="toggleMiniApp(true)">Открыть Mini-App и зачислить деньги →</button>
+        </div>
+      </div>
+    `;
+    box.scrollTop = box.scrollHeight;
+  }, 300);
+}
+
+function renderDashboard() {
+  const total = cases.reduce((s, c) => s + c.amount, 0);
+  const won = cases.filter(c => c.status === 'won' || c.status === 'sent').reduce((s, c) => s + c.amount, 0);
+  document.getElementById('kpiTotal').textContent = fmt(total);
+  document.getElementById('kpiWon').textContent = fmt(won);
+  document.getElementById('kpiBenefit').textContent = 'x' + Math.max(1, Math.round(total / 99));
+  document.getElementById('badgeCount').textContent = cases.length;
+  document.getElementById('maCasesCnt').textContent = cases.length;
+  document.getElementById('chatSumBadge').textContent = '+' + fmt(total);
+  document.getElementById('inlineBtnSum').textContent = fmt(total);
+
+  const st = { new: 'Готов к возврату', sent: 'Диспут в НСПК / ЭЗП', won: '100% Возвращено' };
+  const box = document.getElementById('casesContainer');
+  if (box) {
+    box.innerHTML = cases.map(c => `
+      <div class="case-row" onclick="openCaseModal('${c.id}')">
+        <div class="case-ic">${renderCaseIcon(c.type)}</div>
+        <div>
+          <div class="case-title">
+            <span>${c.title}</span>
+            <span class="verify-tag ${c.verified ? 'ok' : ''}">${c.verified ? 'Верифицировано' : 'Уточнить статус в 1 клик'}</span>
+          </div>
+          <div class="case-meta">
+            <span>${c.merchant}</span> · <span class="mono-num">${c.date}</span> · <span>Источник: ${c.dataOrigin || c.source}</span>
+          </div>
+        </div>
+        <div class="case-amt">
+          ${fmt(c.amount)}
+          <small>Комиссия 0 ₽ (СМС 99₽)</small>
+        </div>
+        <div class="st-badge ${c.status}">${st[c.status] || c.status}</div>
+      </div>
+    `).join('');
+  }
+
+  // Синхронизация списка внутри телефонной шторки WebView
+  const sheetList = document.getElementById('phoneSheetCasesList');
+  if (sheetList) {
+    sheetList.innerHTML = cases.map(c => `
+      <div class="panel-card" style="padding:12px;cursor:pointer" onclick="openCaseModal('${c.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="font-weight:600;font-size:12.5px">${c.title}</div>
+          <span class="mono-num" style="font-weight:700;color:var(--accent);white-space:nowrap">${fmt(c.amount)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--tx2)">
+          <span>${c.merchant} · ${c.date}</span>
+          <span class="mono-num" style="color:var(--tx)">${c.status === 'won' ? 'Возвращено' : 'Уточнить →'}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderSubscriptions() {
+  const activeSubs = subscriptions.filter(s => s.active);
+  document.getElementById('maSubsCnt').textContent = activeSubs.length;
+  const box = document.getElementById('subsContainer');
+  if (!box) return;
+
+  box.innerHTML = subscriptions.map(s => `
+    <div class="case-row" style="cursor:default">
+      <div class="case-ic">${renderCaseIcon('sub')}</div>
+      <div>
+        <div class="case-title">
+          <span>${s.merchant}</span>
+          <span class="verify-tag ${s.active ? '' : 'ok'}">${s.active ? 'Списание через ' + s.nextChargeInDays + ' дн. (Pre-Auth Hold 24ч)' : 'Токен карты отозван в НСПК'}</span>
+        </div>
+        <div class="case-meta">
+          <span>Последнее списание: <span class="mono-num">${s.lastDate}</span></span> · <span>${s.legal}</span>
+        </div>
+      </div>
+      <div class="case-amt">
+        ${fmt(s.monthlyAmount)}/мес
+        <small>Экономия ${fmt(s.annualAmount)} в год</small>
+      </div>
+      <div>
+        ${s.active
+          ? `<button class="btn-secondary btn-sm" onclick="cancelSubscription('${s.id}')">Отозвать токен</button>`
+          : `<span class="st-badge won">Заблокировано</span>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+function cancelSubscription(subId) {
+  const s = subscriptions.find(x => x.id === subId);
+  if (!s) return;
+  s.active = false;
+  renderSubscriptions();
+  toast(`Токен карты для «${s.merchant}» отозван в НСПК по ФЗ № 308-ФЗ!`);
+}
+
+function cancelAllSubscriptions() {
+  subscriptions.forEach(s => s.active = false);
+  renderSubscriptions();
+  toast('Все рекуррентные токены отозваны в НСПК!');
+}
+
+/* OPEN BANKING ЦБ РФ */
+function openOpenBankingModal() {
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-h">
+      <div>
+        <div class="mono-num" style="font-size:11px;color:var(--accent);font-weight:600;text-transform:uppercase;margin-bottom:4px">Стандарт ЦБ РФ · Открытые API (ISO 20022 / ГОСТ Р 57580)</div>
+        <h2 style="font-size:18px;font-weight:700">Межбанковский сбор скрытых удержаний из других банков</h2>
+      </div>
+      <button onclick="closeModal()" style="font-size:20px;color:var(--tx2)">✕</button>
+    </div>
+    <div class="modal-b">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">
+        Mini-App подключается к вашим внешним счетам по протоколу OpenAPI ЦБ РФ, находит переплаты и страховки в чужих банках, а <b>100% возвращённых средств зачисляет на счёт нашего банка</b>.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="panel-card" style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>ПАО СберБанк</b><div style="font-size:12px;color:var(--tx2)">Согласие ЕСИА активно</div></div>
+          <span class="st-badge won">Подключён</span>
+        </div>
+        <div class="panel-card" style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Банк ВТБ</b><div style="font-size:12px;color:var(--tx2)">Согласие ЕСИА активно</div></div>
+          <span class="st-badge won">Подключён</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn-secondary btn-sm" onclick="closeModal()">Отмена</button>
+      <div style="flex:1"></div>
+      <button class="btn-primary btn-sm" onclick="syncOpenBankingAccounts()">Стянуть удержания в наш банк →</button>
+    </div>
+  `;
+  document.getElementById('modalMask').classList.add('active');
+}
+
+async function syncOpenBankingAccounts() {
+  closeModal();
+  toast('Синхронизация по OpenAPI ЦБ РФ...');
+  try {
+    const res = await fetch(`${API_BASE}/openbanking/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ banks: ['СберБанк', 'ВТБ'] })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      cases = [...data.cases, ...cases];
+      document.getElementById('agentSourceSub').textContent = `OpenAPI ЦБ РФ: стянуто +${fmt(data.liquidity_inflow)} из внешних банков в наш банк!`;
+      nav('banklk');
+      toggleMiniApp(true);
+      toast(`Найдено +${fmt(data.liquidity_inflow)} во внешних банках!`);
+      return;
+    }
+  } catch (e) { console.warn(e); }
+  nav('banklk');
+  toggleMiniApp(true);
+}
+
+/* ПАРСЕР ВНЕШНИХ ВЫПИСОК */
+function detectBankName(fullText) {
+  if (/сбербанк|sberbank/i.test(fullText)) return 'СберБанк';
+  if (/т-банк|тинькофф|tinkoff|tbank/i.test(fullText)) return 'Т-Банк';
+  if (/втб|vtb/i.test(fullText)) return 'Банк ВТБ';
+  if (/альфа-банк|alfa-bank/i.test(fullText)) return 'Альфа-Банк';
+  return 'Внешний банк';
+}
+
+function normalizeDateStr(s) {
+  const m = String(s).trim().match(/^(\d{2})[.\/](\d{2})[.\/](\d{2,4})/);
+  if (m) {
+    const y = m[3].length === 2 ? '20' + m[3] : m[3];
+    return `${y}-${m[2]}-${m[1]}`;
+  }
+  return String(s).slice(0, 10);
+}
+
+function extractTransactionsFromText(text, bankLabel = 'Внешний банк') {
+  const lines = text.trim().replace(/\r\n/g, '\n').split('\n').filter(l => l.trim());
+  const out = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (/^date|^дата|выписка/i.test(line)) continue;
+    if (line.includes(';') || line.includes('\t')) {
+      const sep = line.includes(';') ? ';' : '\t';
+      const parts = line.split(sep).map(s => s.replace(/^"|"$/g, '').trim());
+      if (parts.length >= 3) {
+        const amt = parseFloat(parts[2].replace(/[\s\u00A0]/g, '').replace(',', '.'));
+        if (!isNaN(amt) && Math.abs(amt) > 0) {
+          out.push({ date: normalizeDateStr(parts[0]), merchant: parts[1], amount: Math.abs(amt), description: parts.slice(3).join(' '), raw_line: line.slice(0, 80), bank: bankLabel });
+          continue;
+        }
+      }
+    }
+    const dateMatch = line.match(/(\d{2}[.\/]\d{2}[.\/]\d{2,4}|\d{4}-\d{2}-\d{2})/);
+    const amtMatches = [...line.matchAll(/([+\-]?\s*\d{1,3}(?:[\s\u00A0]\d{3})*(?:[.,]\d{2}))/g)];
+    if (dateMatch && amtMatches.length > 0) {
+      const amt = parseFloat(amtMatches[amtMatches.length - 1][1].replace(/[\s\u00A0+]/g, '').replace(',', '.'));
+      if (!isNaN(amt) && Math.abs(amt) >= 50) {
+        let mid = line.replace(dateMatch[1], '').replace(amtMatches[amtMatches.length - 1][0], '').replace(/\s+/g, ' ').trim();
+        if (mid.length >= 2) out.push({ date: normalizeDateStr(dateMatch[1]), merchant: mid.slice(0, 48), amount: Math.abs(amt), description: mid, raw_line: line.slice(0, 80), bank: bankLabel });
+      }
+    }
+  }
+  return out;
+}
+
+async function handleRealFile(file) {
+  if (!file) return;
+  toast('Чтение прикреплённой выписки: ' + file.name);
+  try {
+    const text = await file.text();
+    const bank = detectBankName(text);
+    const txs = extractTransactionsFromText(text, bank);
+    if (!txs.length) return toast('Операции не распознаны');
+    const res = await fetch(`${API_BASE}/analyze_real`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(txs)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.cases && data.cases.length) {
+        cases = data.cases;
+        nav('banklk');
+        toggleMiniApp(true);
+        toast(`Из файла ${file.name} добавлено ${data.cases.length} кейсов!`);
+      }
+    }
+  } catch (e) { toast('Ошибка чтения файла'); }
+}
+
+/* СИМУЛЯТОР ПЕРЕХВАТА СМС + PRE-AUTH HOLD 24Ч */
+const smsTemplates = [
+  {
+    type: 'sub', icon: 'SUB', merchant: 'Яндекс Плюс / Кинопоиск', amount: 3990, baseAmount: 3990,
+    sms: 'Попытка автосписания 3 990 ₽ (Годовой тариф). ИИ-Блокиратор заморозил транзакцию на 24 часа (Pre-Auth Hold)!',
+    title: 'Заморожено автосписание 3 990 ₽ (Pre-Auth Hold 24ч)',
+    legal: 'ФЗ № 308-ФЗ (ст. 16.1 ЗоЗПП РФ) · Превентивный Hold до клиринга (обход ст. 429.4 ГК РФ)',
+    reasonCode: '4541 (Pre-Auth Hold & Token Revocation)',
+    verifyPrompt: 'ИИ заморозил списание 3 990 ₽ на 24 часа. Подтвердите действие:',
+    verifyOptions: [
+      { code: 'sub_308fz', label: 'Отменить списание (Расхолдировать 3 990 ₽ обратно и отозвать токен)' },
+      { code: 'flight_ok', label: 'Разрешить списание (Снять Hold)' }
+    ]
+  },
+  {
+    type: 'avia', icon: 'AVIA', merchant: 'S7 Airlines', amount: 26400, baseAmount: 16400,
+    sms: 'Списание 16 400 ₽ S7 AIRLINES. ИИ обнаружил сбой рейса S7-2041 по табло аэропорта!',
+    title: 'Проверка рейса S7-2041 (Перехвачено в чате банка)',
+    legal: 'ВК РФ ст. 108, ст. 120 · ЗоЗПП ст. 28',
+    reasonCode: '4555 (Нарушение условий перевозки)',
+    verifyPrompt: 'Откуда данные: СМС-банк + чек ОФД (16 400 ₽). Уточните статус рейса S7-2041:',
+    verifyOptions: [
+      { code: 'flight_cancelled', label: 'Рейс ОТМЕНЁН (Полный возврат + убытки)' },
+      { code: 'flight_delayed_4h', label: 'Рейс ЗАДЕРЖАН на 4+ часа (Неустойка 3%/час + штраф 50%)' },
+      { code: 'flight_ok', label: 'Рейс вылетел вовремя (Удалить кейс)' }
+    ]
+  }
+];
+let smsIdx = 0;
+
+function simulateIncomingSMS() {
+  const tpl = smsTemplates[smsIdx % smsTemplates.length];
+  smsIdx++;
+  const newId = 'case-' + Math.floor(100 + Math.random() * 899);
+  cases.unshift({
+    id: newId, type: tpl.type, icon: tpl.icon, title: tpl.title, merchant: tpl.merchant,
+    date: 'Только что', amount: tpl.amount, baseAmount: tpl.baseAmount, status: 'new',
+    verified: false,
+    verifyPrompt: tpl.verifyPrompt,
+    verifyOptions: tpl.verifyOptions,
+    dataOrigin: 'LIVE Перехват СМС-банка (99 ₽/мес) + Pre-Auth Hold 24ч в процессинге',
+    source: 'LIVE Перехват СМС + Hold 24ч', legal: tpl.legal, reasonCode: tpl.reasonCode,
+    desc: tpl.sms,
+    letter: `ТРЕБОВАНИЕ ОБ ОТМЕНЕ АВТОРИЗАЦИИ И ВОЗВРАТЕ СРЕДСТВ\nКому: ${tpl.merchant}\nТребую вернуть ${fmt(tpl.amount)} на основании ${tpl.legal}.`
+  });
+  renderDashboard();
+
+  const pop = document.createElement('div');
+  pop.className = 'push-popup';
+  pop.innerHTML = `
+    <div class="mono-num" style="display:flex;justify-content:space-between;font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px">
+      <span>СМС-БАНК · HOLD 24 ЧАСА</span><span>Сейчас</span>
+    </div>
+    <div style="font-weight:600;font-size:13px;margin-bottom:14px">${tpl.sms}</div>
+    <button class="btn-primary btn-sm" style="width:100%" onclick="this.closest('.push-popup').remove();nav('banklk');toggleMiniApp(true);openCaseModal('${newId}')">Открыть в Mini-App и вернуть ${fmt(tpl.amount)} →</button>
+  `;
+  document.getElementById('pushZone').appendChild(pop);
+  setTimeout(() => { if (pop.parentNode) pop.remove(); }, 7500);
+}
+
+/* МОДАЛЬНОЕ ОКНО КЕЙСА */
+function openCaseModal(id) {
+  const c = cases.find(x => x.id === id);
+  if (!c) return;
+
+  const verifyHtml = (c.verifyOptions && c.verifyOptions.length) ? `
+    <div class="verify-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="font-weight:700;font-size:13px;color:var(--accent)">Интерактивное уточнение обстоятельств (Human-in-the-Loop)</div>
+        <span class="mono-num" style="font-size:11px;color:var(--tx2)">${c.verified ? 'Подтверждено клиентом' : 'Требуется 1 клик'}</span>
+      </div>
+      <div style="font-size:13px;color:var(--tx);margin-top:6px">${c.verifyPrompt || 'Уточните статус операции:'}</div>
+      <div class="verify-btns">
+        ${c.verifyOptions.map(o => `<button class="v-btn" onclick="applyVerification('${c.id}', '${o.code}')">${o.label}</button>`).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-h">
+      <div>
+        <div class="mono-num" style="font-size:11px;color:var(--tx2);text-transform:uppercase;margin-bottom:4px">Откуда данные: ${c.dataOrigin || c.source}</div>
+        <h2 style="font-size:18px;font-weight:700">${c.title}</h2>
+      </div>
+      <button onclick="closeModal()" style="font-size:20px;color:var(--tx2)">✕</button>
+    </div>
+    <div class="modal-b">
+      <div class="esia-banner">
+        <div><b>Цифровой мандат Госуслуг (ЕСИА) активен:</b> Банк выступает вашим представителем по 63-ФЗ. Скан паспорта не требуется.</div>
+        <span class="st-badge won">ПЭП 63-ФЗ</span>
+      </div>
+
+      ${verifyHtml}
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 't-main')">Расчёт и Закон РФ</button>
+        <button class="tab-btn" onclick="switchTab(this, 't-ofd'); loadOFD('${c.id}')">Первичный чек ФНС (ОФД)</button>
+        <button class="tab-btn" onclick="switchTab(this, 't-doc')">Претензия + Ордер АБС</button>
+      </div>
+
+      <div id="t-main" class="tab-pane">
+        <div class="panel-card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div class="kpi-lbl">Сумма к зачислению клиенту</div>
+            <div class="mono-num" style="font-size:28px;font-weight:700;color:var(--accent)">${fmt(c.amount)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="kpi-lbl">Комиссия банка</div>
+            <div class="mono-num" style="font-size:15px;font-weight:600;color:var(--tx)">0 ₽ (Тариф СМС 99 ₽/мес)</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div class="panel-card"><div class="kpi-lbl">Нормативная база РФ</div><div style="font-weight:600;font-size:13px">${c.legal}</div></div>
+          <div class="panel-card"><div class="kpi-lbl">Код диспута НСПК «Мир»</div><div class="mono-num" style="font-weight:600;font-size:13px;color:var(--accent)">${c.reasonCode}</div></div>
+        </div>
+        <div class="panel-card"><div class="kpi-lbl">Прозрачная цепочка доказательств</div><div style="color:var(--tx2);font-size:13px">${c.desc}</div></div>
+      </div>
+
+      <div id="t-ofd" class="tab-pane hidden">
+        <div id="ofdBox" style="padding:24px;text-align:center;color:var(--tx2)">Запрос к Python FastAPI (${API_BASE}/ofd/enrich)...</div>
+      </div>
+
+      <div id="t-doc" class="tab-pane hidden">
+        <div class="panel-card mono-num" style="margin-bottom:12px;font-size:12px;color:var(--tx2)">
+          Проводка АБС (ЦФТ / Диасофт): Дт 30232810400000000105 (Расчёты ПС Мир) → Кт 40817810200005662901 (Счёт клиента) · Сумма: ${fmt(c.amount)}
+        </div>
+        <textarea class="letter-box" id="letterText">${c.letter}</textarea>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn-secondary btn-sm" onclick="closeModal()">Закрыть</button>
+      <div style="flex:1"></div>
+      <button class="btn-secondary btn-sm" onclick="triggerNSPK('${c.id}')">Чарджбэк в НСПК «Мир» (JSON)</button>
+      <button class="btn-primary btn-sm" onclick="triggerEZP('${c.id}')">Госпочта РФ ЭЗП (ЕСИА XML)</button>
+    </div>
+  `;
+  document.getElementById('modalMask').classList.add('active');
+}
+
+async function applyVerification(caseId, choiceCode) {
+  const idx = cases.findIndex(x => x.id === caseId);
+  if (idx === -1) return;
+  const c = cases[idx];
+
+  if (choiceCode === 'flight_ok' || choiceCode === 'sub_active' || choiceCode === 'hold_released') {
+    cases.splice(idx, 1);
+    closeModal();
+    renderDashboard();
+    toast('Операция подтверждена как корректная и исключена');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/verify_case`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        case_id: c.id,
+        merchant: c.merchant,
+        base_amount: c.baseAmount || c.amount,
+        verify_choice: choiceCode
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      c.amount = data.new_amount;
+      c.legal = data.legal;
+      c.desc = data.status_note;
+      c.letter = data.letter;
+      c.verified = true;
+      renderDashboard();
+      openCaseModal(c.id);
+      toast(`Статус уточнён! Сумма по закону РФ: ${fmt(c.amount)}`);
+      return;
+    }
+  } catch (e) { console.warn(e); }
+
+  c.verified = true;
+  renderDashboard();
+  openCaseModal(c.id);
+}
+
+function closeModal() { document.getElementById('modalMask').classList.remove('active'); }
+
+function switchTab(btn, paneId) {
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+  document.getElementById(paneId).classList.remove('hidden');
+}
+
+async function loadOFD(id) {
+  const c = cases.find(x => x.id === id);
+  const box = document.getElementById('ofdBox');
+  try {
+    const res = await fetch(`${API_BASE}/ofd/enrich`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: c.id, merchant: c.merchant, amount: c.amount, type: c.type, date: c.date })
+    });
+    const data = await res.json();
+    box.innerHTML = `
+      <div class="panel-card mono-num" style="text-align:left">
+        <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:var(--tx)">ПЕРВИЧНЫЙ КАССОВЫЙ ЧЕК ОФД ФНС РФ · ИНН: ${data.inn}</div>
+        ${data.items.map(i => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)"><span>${i.name} (x${i.qty})</span><b>${fmt(i.price)}</b></div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding-top:12px;font-size:14px;font-weight:700;color:var(--accent)"><span>ИТОГО ПО ЧЕКУ:</span><span>${fmt(data.total)}</span></div>
+        <div style="margin-top:12px;font-size:11px;color:var(--tx3)">ФН: ${data.fn} · ФД: ${data.fd} · ФПД: ${data.fpd}</div>
+      </div>
+    `;
+  } catch (e) {
+    box.innerHTML = `<div style="color:var(--accent)">Запустите в терминале VS Code: python -m uvicorn main:app --reload --port 8000</div>`;
+  }
+}
+
+async function triggerNSPK(id) {
+  const c = cases.find(x => x.id === id);
+  try {
+    const res = await fetch(`${API_BASE}/nspk/chargeback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: c.id, merchant: c.merchant, amount: c.amount, type: c.type, date: c.date })
+    });
+    const data = await res.json();
+    c.status = 'won';
+    c.verified = true;
+    renderDashboard();
+    document.querySelector('.modal-b').innerHTML = `
+      <h3 style="color:var(--tx);margin-bottom:12px;font-size:15px">Диспут принят клирингом НСПК «Мир» (FastAPI Backend)</h3>
+      <pre class="code-terminal">${JSON.stringify(data, null, 2)}</pre>
+    `;
+    toast(`Возвращено ${fmt(c.amount)} на карту *5662!`);
+  } catch (e) { toast('Запустите Python-сервер в VS Code (порт 8000)'); }
+}
+
+async function triggerEZP(id) {
+  const c = cases.find(x => x.id === id);
+  try {
+    const res = await fetch(`${API_BASE}/ezp/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: c.id, merchant: c.merchant, amount: c.amount, type: c.type, date: c.date })
+    });
+    const data = await res.json();
+    c.status = 'sent';
+    c.verified = true;
+    renderDashboard();
+    document.querySelector('.modal-b').innerHTML = `
+      <h3 style="color:var(--tx);margin-bottom:12px;font-size:15px">Досудебная претензия доставлена в Госуслуги юрлица по мандату ЕСИА (Трек: ${data.tracking_number})</h3>
+      <pre class="code-terminal" style="white-space:pre-wrap">${data.xml_payload.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+    `;
+    toast(`Претензия отправлена через Госпочту (${data.tracking_number})`);
+  } catch (e) { toast('Запустите Python-сервер в VS Code (порт 8000)'); }
+}
+
+function sendAllCases() {
+  cases.forEach(c => { c.status = 'won'; c.verified = true; });
+  renderDashboard();
+  toast('Все 100% средств востребованы и зачислены на карту *5662!');
+}
+
+async function checkBackendStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (res.ok) {
+      document.getElementById('apiText').textContent = 'FastAPI + ЕСИА: Online';
+      toast('Связь с Python FastAPI (порт 8000) активна');
+    }
+  } catch (e) {
+    document.getElementById('apiText').textContent = 'Гибридный режим';
+  }
+}
+
+function calcBankROI() {
+  const mln = parseInt(document.getElementById('roiSlider').value);
+  document.getElementById('roiUsersVal').textContent = mln + ' млн чел.';
+  document.getElementById('roiBankRev').textContent = (mln * 0.28 * 99 * 12 / 1000).toFixed(2) + ' млрд ₽';
+  document.getElementById('roiLiquidity').textContent = '+' + (mln * 4.2).toFixed(1) + ' млрд ₽';
+}
+
+setBankTheme('tbank', 'Т-Банк Онлайн', '#FFDD2D', '#111111', null);
+renderDashboard();
+renderSubscriptions();
+checkBackendStatus();
+</script>
+</body>
+</html>
